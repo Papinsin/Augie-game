@@ -3,7 +3,7 @@
 # main character augustana viking (axe vapon)
 # randomly generate valiens (different college logos)
 # randomly generate the background 
-
+# maskot 
 '''
 
 Use the witch to catch spiders. Move the witch using the left and right arrow keys.
@@ -13,14 +13,31 @@ from graphics2 import *
 import time
 import random
 import math
+import pygame
 
 SPIDER_SPEED = 5
 WITCH_SPEED = 25
 NUM_LOSE = 5
-NUM_WIN = 10
+NUM_WIN = 20
 STALL_TIME = 0.05
 THRESHOLD = 50
 AXE_SPEED = 15 
+
+pygame.mixer.init()
+
+# ✅ LOAD ONCE HERE (Before the loop starts)
+pygame.mixer.music.load("sounds/GameLoop.mp3")
+hitEnemySound = pygame.mixer.Sound("sounds/hitEnemy.mp3")
+gameOverSound = pygame.mixer.Sound("sounds/gameOver.mp3")
+gameOverSoundByPoints = pygame.mixer.Sound("sounds/loseByPoints.mp3")
+coalision = pygame.mixer.Sound("sounds/coalision.mp3")
+winSound = pygame.mixer.Sound("sounds/winSound.mp3")
+
+
+# catch_sound = pygame.mixer.Sound("catch.wav")
+
+# winSound = 
+# LoseSound =
 
 listOfAxes  =[]
 WindowHeight = 666
@@ -79,18 +96,28 @@ def updateAxes(axes, spiderList):
     hits = 0
     for axe in axes[:]:
         axe.move(0, -AXE_SPEED)
-        if axe.getCenter().getY() < 0:
+
+        # undrawing the axe if it passes y = 0
+
+        if(axe.getCenter().getY() < 0):
             axe.undraw()
             axes.remove(axe)
             continue
+
+        #use a for loop to check if any 
+        #of the spiders were hit        
         for spider in spiderList[:]:
-            if is_close_enough(axe, spider):
+            if(is_close_enough(spider, axe)):
+                hitEnemySound.play()
                 spider.undraw()
                 spiderList.remove(spider)
+
                 axe.undraw()
                 axes.remove(axe)
-                hits += 1
+
+                hits+= 1
                 break
+
     return hits
 
 def displayOfInstructions(window):
@@ -220,7 +247,6 @@ def move_witch(window, witch_img, weapons):
         witch_img.move(-WITCH_SPEED, 0)
     elif key == "space":
         throwAxe(window ,witch_img,weapons)
-        print("throw")
     
     # 2. Mouse Click Movement relative to the image edges
     click = window.checkMouse()
@@ -266,16 +292,41 @@ def add_spider_to_window(window):
     spider.scale(1/7)
     spider.draw(window)
     return spider
+def gameOver(witch ,  window):
+    time.sleep(1)
+    gameOverText = Text(Point(WindowWidth/2, WindowHeight/2) ,"Game Over")
+    gameOverText.setSize(90)
+    gameOverText.draw(window)
+    gameOverText.setStyle("bold")
+    gameOverText.setFace("times roman")
+    gameOverText.setTextColor("darkRed")
+    witch.move(WindowHeight + 2 , WindowWidth + 2)
+    window.getMouse()
+
+def win(witch,window):
+    winSound.play()
+    time.sleep(1)
+    gameOverText = Text(Point(WindowWidth/2, WindowHeight/2) ,"You Win")
+    gameOverText.setSize(90)
+    gameOverText.draw(window)
+    gameOverText.setStyle("bold")
+    gameOverText.setFace("times roman")
+    gameOverText.setTextColor("darkGreen")
+    witch.move(WindowHeight + 2 , WindowWidth + 2)
+    window.getMouse()
+
 
 def game_loop(window, witch):
     spiderList = []
     axes = []
     missed = 0
     cought = 0
+    loseStatus = False 
     score = Text(Point(50, 40), '')
     score.draw(window)
 
-    while missed < NUM_LOSE and cought < NUM_WIN:
+    pygame.mixer.music.play(-1)  
+    while missed < NUM_LOSE and cought < NUM_WIN and not loseStatus:
         score.setText(f"missed: {missed}  caught: {cought}")
         score.setFill("red")
 
@@ -289,10 +340,13 @@ def game_loop(window, witch):
         # move enemies, check for witch catch or escape
         for spider in spiderList[:]:
             spider.move(0, SPIDER_SPEED)
+
             if is_close_enough(witch, spider):
-                spider.undraw()
-                spiderList.remove(spider)
-                cought = cought + 1
+                coalision.play() 
+                gameOver(witch , window )
+                loseStatus = True
+                    
+
             elif spider.getCenter().getY() > 700:
                 spider.undraw()
                 spiderList.remove(spider)
@@ -302,31 +356,42 @@ def game_loop(window, witch):
         cought = cought + updateAxes(axes, spiderList)
 
         time.sleep(STALL_TIME)
-        
-def creatingActionSquares(window):
-    # WindowHeight;
-    # WindowWidth;
+        if (missed >= NUM_LOSE):
+            pygame.mixer.music.stop()
+            gameOverSoundByPoints.play()
+            gameOver(witch, window)
+
+        elif(cought >= NUM_WIN):
+            win(witch,  window)
+    
+
+
+
+
+# def creatingActionSquares(window):
+#     # WindowHeight;
+#     # WindowWidth;
 
     
     
-    left_rectangle = Rectangle(Point(0, WindowHeight - rect_height), Point(WindowWidth /2, WindowWidth))
-    # left_rectangle.setOutline("black")
-    left_rectangle.draw(window)
+#     left_rectangle = Rectangle(Point(0, WindowHeight - rect_height), Point(WindowWidth /2, WindowWidth))
+#     # left_rectangle.setOutline("black")
+#     left_rectangle.draw(window)
 
-    left_rectangle = left_rectangle.getCenter()
-    left_rectangle = Text(left_rectangle, "")
-    # left_rectangle.setFill("black")
-    left_rectangle.draw(window)
+#     left_rectangle = left_rectangle.getCenter()
+#     left_rectangle = Text(left_rectangle, "")
+#     # left_rectangle.setFill("black")
+#     left_rectangle.draw(window)
 
 
-    right_rectangle = Rectangle(Point(WindowWidth/2, WindowHeight - rect_height), Point(WindowWidth, WindowWidth))
-    # right_rectangle.setOutline("black")
-    right_rectangle.draw(window)
+#     right_rectangle = Rectangle(Point(WindowWidth/2, WindowHeight - rect_height), Point(WindowWidth, WindowWidth))
+#     # right_rectangle.setOutline("black")
+#     right_rectangle.draw(window)
 
-    right_rectangle = right_rectangle.getCenter()
-    right_rectangle = Text(right_rectangle, "")
-    # right_rectangle.setFill("black")
-    right_rectangle.draw(window)
+#     right_rectangle = right_rectangle.getCenter()
+#     right_rectangle = Text(right_rectangle, "")
+#     # right_rectangle.setFill("black")
+#     right_rectangle.draw(window)
 
 def main():
     # setup the game 
