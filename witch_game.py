@@ -1,14 +1,9 @@
 # Devid , Ali 
-# protext augustana college 
+# project Augustana college game
 # main character augustana viking (axe vapon)
-# randomly generate valiens (different college logos)
-# randomly generate the background 
-# maskot 
-'''
+# randomly generate valiens (different college maskots)
+# randomly generate the background (pictures of augustana college at different locations)
 
-Use the witch to catch spiders. Move the witch using the left and right arrow keys.
-If the witch catches enough spiders before they escape, you win.
-'''
 from graphics2 import *
 import time
 import random
@@ -25,19 +20,15 @@ AXE_SPEED = 15
 
 pygame.mixer.init()
 
-# ✅ LOAD ONCE HERE (Before the loop starts)
+# music and sound operations 
 pygame.mixer.music.load("sounds/GameLoop.mp3")
+# music for background music . Sounds are the sound effects 
 hitEnemySound = pygame.mixer.Sound("sounds/hitEnemy.mp3")
 gameOverSound = pygame.mixer.Sound("sounds/gameOver.mp3")
 gameOverSoundByPoints = pygame.mixer.Sound("sounds/loseByPoints.mp3")
 coalision = pygame.mixer.Sound("sounds/coalision.mp3")
 winSound = pygame.mixer.Sound("sounds/winSound.mp3")
 
-
-# catch_sound = pygame.mixer.Sound("catch.wav")
-
-# winSound = 
-# LoseSound =
 
 listOfAxes  =[]
 WindowHeight = 666
@@ -83,7 +74,10 @@ def throwAxe(window, witch, axes):
     axe = Image(Point(pos.getX(), pos.getY() - 40), mainCharacterWeaponImage)
     axe.scale(1/10)
     axe.draw(window)
-    axes.append(axe)
+    if len(axes) < 5:
+        axes.append(axe)
+    else:
+        axe.undraw()
 
 def updateAxes(axes, spiderList):
     '''
